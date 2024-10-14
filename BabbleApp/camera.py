@@ -10,9 +10,18 @@ from colorama import Fore
 from config import BabbleConfig, BabbleSettingsConfig
 from utils.misc_utils import get_camera_index_by_name, list_camera_names
 from enum import Enum
+import psutil, os
+import sys
+
+process = psutil.Process(os.getpid())   # Set "UNIX" thread / "WIN" process priority
+try:
+    sys.getwindowsversion()
+except AttributeError:
+    process.nice(0)  # UNIX: 20:Low, 0:Default, -20:High
+else:
+    process.nice(psutil.NORMAL_PRIORITY_CLASS)  # Windows: Sets process priority. If not "NORMAL" just needless scheduler overhead?!
 
 WAIT_TIME = 0.1
-
 # Serial communication protocol:
 # header-begin (2 bytes)
 # header-type (2 bytes)
