@@ -49,6 +49,7 @@ class BabbleProcessor:
         capture_queue_incoming: "queue.Queue(maxsize=2)",
         image_queue_outgoing: "queue.Queue(maxsize=2)",
         cam_id,
+        osc_queue: queue.Queue,
     ):
         self.main_config = BabbleSettingsConfig
         self.config = config
@@ -61,6 +62,7 @@ class BabbleProcessor:
         self.cancellation_event = cancellation_event
         self.capture_event = capture_event
         self.cam_id = cam_id
+        self.osc_queue = osc_queue
 
         # Image state
         self.previous_image = None
@@ -127,6 +129,9 @@ class BabbleProcessor:
 
         self.previous_image = self.current_image
         self.previous_rotation = self.config.rotation_angle
+        
+        # Relay information to OSC
+        self.osc_queue.put((None, output_information))
 
     def capture_crop_rotate_image(self):
         # Get our current frame
@@ -197,15 +202,12 @@ class BabbleProcessor:
                 print("\033[94m[INFO] Exiting Tracking thread\033[0m")
                 return
 
-
             if self.config.roi_window_w <= 0 or self.config.roi_window_h <= 0:
                 # At this point, we're waiting for the user to set up the ROI window in the GUI.
                 # Sleep a bit while we wait.
                 if self.cancellation_event.wait(0.1):
                     return
                 continue
-
-
 
             try:
                 if self.capture_queue_incoming.empty():
@@ -215,7 +217,7 @@ class BabbleProcessor:
                     self.current_image,
                     self.current_frame_number,
                     self.current_fps,
-                ) = self.capture_queue_incoming.get(block=True, timeout=0.2)
+                ) = self.capture_queue_incoming.get(block=True, timeout=0.1)
             except queue.Empty:
                 # print("No image available")
                 continue
@@ -237,10 +239,10 @@ class BabbleProcessor:
             run_model(self)
             if self.settings.use_calibration:
                 self.output = cal.cal_osc(self, self.output)
-
             #else:
              #   pass
             #print(self.output)
+
             self.output_images_and_update(CamInfo(self.current_algo, self.output))
 
     def get_framesize(self):
