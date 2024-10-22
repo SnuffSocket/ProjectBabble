@@ -158,7 +158,7 @@ class Camera:
             # Assuming we can access our capture source, wait for another thread to request a capture.
             # Cycle every so often to see if our cancellation token has fired. This basically uses a
             # python event as a context-less, resettable one-shot channel.
-            if should_push and not self.capture_event.wait(timeout=0.001):
+            if should_push and not self.capture_event.wait(timeout=0.02):
                 continue
             if self.config.capture_source is not None:
                 ports = ("COM", "/dev/tty")
@@ -179,6 +179,7 @@ class Camera:
                 raise RuntimeError(lang._instance.get_string("error.frame"))
             self.FRAME_SIZE = image.shape
             frame_number = self.cv2_camera.get(cv2.CAP_PROP_POS_FRAMES)
+            # Calculate FPS
             current_frame_time = time.time()    # Should be using "time.perf_counter()", not worth ~3x cycles?
             delta_time = current_frame_time - self.last_frame_time
             self.last_frame_time = current_frame_time
@@ -188,7 +189,7 @@ class Camera:
             self.bps = image.nbytes * self.fps
 
             if should_push:
-                self.push_image_to_queue(image, frame_number, self.fps)
+                self.push_image_to_queue(image, frame_number + 1, self.fps)
         except Exception:
             print(
                 f'{Fore.YELLOW}[{lang._instance.get_string("log.warn")}] {lang._instance.get_string("warn.captureProblem")}{Fore.RESET}'
@@ -250,7 +251,7 @@ class Camera:
                             f'{Fore.YELLOW}[{lang._instance.get_string("log.warn")}] {lang._instance.get_string("warn.frameDrop")}{Fore.RESET}'
                         )
                         return
-                    # Calculate the fps.
+                    # Calculate FPS
                     current_frame_time = time.time()    # Should be using "time.perf_counter()", not worth ~3x cycles?
                     delta_time = current_frame_time - self.last_frame_time
                     self.last_frame_time = current_frame_time
@@ -260,14 +261,14 @@ class Camera:
                     self.bps = len(jpeg) * self.fps
 
                     if should_push:
-                        self.push_image_to_queue(image, current_frame_time, self.fps)
+                        self.push_image_to_queue(image, int(current_fps), self.fps)
                 # Discard the serial buffer. This is due to the fact that it,
                 # may build up some outdated frames. A bit of a workaround here tbh.
                 # Do this at the end to give buffer time to refill.
                 if self.serial_connection.in_waiting >= BUFFER_SIZE:
-                    print(f"{Fore.CYAN}[INFO] Discarding the serial buffer ({self.serial_connection.in_waiting} bytes){Fore.RESET}")
+                    print(f'{Fore.CYAN}[{lang._instance.get_string("log.info")}] {lang._instance.get_string("info.discardingSerial")} ({self.serial_connection.in_waiting} bytes){Fore.RESET}')
                     self.serial_connection.reset_input_buffer()
-                    self.buffer = b''
+                    self.buffer = b""
 
         except Exception:
             print(
