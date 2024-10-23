@@ -71,7 +71,7 @@ class Camera:
         self.bps = 0
         self.start = True
         self.buffer = b""
-        self.sp_max = 2560  # Most ETVR frames are ~4298-4800 bytes (Keep lower!)
+        self.sp_max = 0  # Most frames are ~4298-4800 bytes
         self.FRAME_SIZE = [0, 0]
 
         self.error_message = f'{Fore.YELLOW}[{lang._instance.get_string("log.warn")}] {lang._instance.get_string("info.enterCaptureOne")} {{}} {lang._instance.get_string("info.enterCaptureTwo")}{Fore.RESET}'
@@ -205,7 +205,7 @@ class Camera:
         # Erm, so yah...
         buffer_len = self.serial_read(2048)
         if buffer_len >= ETVR_HEADER_LEN:
-            if buffer_len > (self.sp_max * 2.3):
+            if self.sp_max and buffer_len > (self.sp_max * 2.3):
                 # Skip frames:
                 #  Ad hoc to catch up to latest frames. Got a feelin there's going to be unforeseen consequences for this one
                 beg = self.buffer.rfind(ETVR_HEADER)
