@@ -71,8 +71,8 @@ class Camera:
         self.bps = 0
         self.start = True
         self.buffer = b""
-        self.sp_max = 0  # Most frames are ~4298-4800 bytes
-        self.FRAME_SIZE = [0, 0]
+        self.sp_max = 0
+        #self.FRAME_SIZE = [0, 0]
 
         self.error_message = f'{Fore.YELLOW}[{lang._instance.get_string("log.warn")}] {lang._instance.get_string("info.enterCaptureOne")} {{}} {lang._instance.get_string("info.enterCaptureTwo")}{Fore.RESET}'
 
@@ -177,7 +177,7 @@ class Camera:
             if not ret:
                 self.cv2_camera.set(cv2.CAP_PROP_POS_FRAMES, 0)
                 raise RuntimeError(lang._instance.get_string("error.frame"))
-            self.FRAME_SIZE = image.shape
+            #self.FRAME_SIZE = image.shape
             frame_number = self.cv2_camera.get(cv2.CAP_PROP_POS_FRAMES)
             # Calculate FPS
             current_frame_time = time.time()    # Should be using "time.perf_counter()", not worth ~3x cycles?
@@ -206,8 +206,7 @@ class Camera:
         buffer_len = self.serial_read(2048)
         if buffer_len >= ETVR_HEADER_LEN:
             if self.sp_max and buffer_len > (self.sp_max * 2.3):
-                # Skip frames:
-                #  Ad hoc to catch up to latest frames. Got a feelin there's going to be unforeseen consequences for this one
+                # Skip frames: Ad hoc to catch up to latest frames. Got a feelin there's going to be unforeseen consequences for this one
                 beg = self.buffer.rfind(ETVR_HEADER)
             else:
                 beg = self.buffer.find(ETVR_HEADER)
@@ -229,7 +228,6 @@ class Camera:
                         jpeg = self.buffer[ETVR_HEADER_LEN:end-2]
                         self.buffer = self.buffer[end-2:]
                         return jpeg
-                    # Sometime we end up here ~44 times in a row, because "buffer_len" < "end" or EOL '\xff\xd9' was not found. Loosing 2.3-2.5 frames before things get normal
                     if end > self.sp_max:
                         self.sp_max = end
         return False
