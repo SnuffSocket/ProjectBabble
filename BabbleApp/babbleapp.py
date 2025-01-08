@@ -21,7 +21,6 @@ import PySimpleGUI as sg
 import queue
 import requests
 import threading
-from ctypes import windll, c_int
 from babble_model_loader import *
 from camera_widget import CameraWidget
 from config import BabbleConfig
@@ -37,6 +36,7 @@ winmm = None
 
 if is_nt:
     from winotify import Notification
+    from ctypes import windll, c_int
     try:
         winmm = windll.winmm
     except OSError:
