@@ -18,4 +18,5 @@ requests==2.32.3;
 v4l2py==3.0.0;
 sounddevice==0.5.1;
 soundfile==0.13.1;
+desktop_notifier==6.0.0;
 libscrc>=1.8.1;
