@@ -14,6 +14,8 @@ from colorama import Fore
 from config import BabbleConfig, BabbleSettingsConfig
 from libscrc import rohc
 from utils.misc_utils import get_camera_index_by_name, list_camera_names, os_type
+import psutil, os
+import sys
 
 from vivefacialtracker.vivetracker import ViveTracker
 from vivefacialtracker.camera_controller import FTCameraController
