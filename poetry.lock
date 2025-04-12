@@ -365,18 +365,6 @@ files = [
     {file = "dbus_fast-2.33.0.tar.gz", hash = "sha256:da2f3a2f2e10092c67a911578135c2244d04b52ec87dda80997bf65e78f79251"},
 ]
 
-[[package]]
-name = "desktop-notifier"
-version = "6.0.0"
-description = "Python library for cross-platform desktop notifications"
-optional = false
-python-versions = ">=3.7"
-groups = ["main"]
-files = [
-    {file = "desktop_notifier-6.0.0-py3-none-any.whl", hash = "sha256:7caf6f683f9f5afd0fced3da5305d6b04a467148a6d23fb99a11dad85ececb40"},
-    {file = "desktop_notifier-6.0.0.tar.gz", hash = "sha256:188b6cf8f59192afc5c6ed9dc8304d46ee0380b08750e826fcce1048083d5cd8"},
-]
-
 [package.dependencies]
 bidict = "*"
 dbus-fast = {version = "*", markers = "sys_platform == \"linux\""}

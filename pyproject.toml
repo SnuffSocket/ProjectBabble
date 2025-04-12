@@ -28,7 +28,6 @@ libscrc = "^1.8.1"
 freesimplegui = "^5.1.1"
 sounddevice = "^0.5.1"
 soundfile = "^0.13.1"
-desktop-notifier = "^6.0.0"
 
 [tool.poetry.group.dev.dependencies]
 black = "^22.10.0"
